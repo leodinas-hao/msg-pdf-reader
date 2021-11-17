@@ -1,17 +1,19 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import MsgReader from '@kenjiuno/msgreader'
+import MsgReader from '@kenjiuno/msgreader';
+import Pdf from 'pdf-parse';
 
-export async function getFiles(dir: string, pattern?: string): Promise<string[]> {
+
+export async function getFiles(dir: string, pattern?: RegExp): Promise<string[]> {
   const list = await fs.readdir(dir)
 
   return list
-    .filter((file) => pattern ? (new RegExp(pattern)).test(file) : true)
+    .filter((file) => pattern ? pattern.test(file) : true)
     .map((file) => path.join(dir, file))
 }
 
-export async function getAttachments(file: string, pattern: string = '.pdf$')
+export async function getAttachments(file: string, pattern: RegExp = /.pdf$/i)
   : Promise<{ fileName: string; content: Uint8Array }[]> {
   const fileBuffer = await fs.readFile(file)
   const msg = new MsgReader(fileBuffer)
@@ -26,4 +28,21 @@ export async function getAttachments(file: string, pattern: string = '.pdf$')
     }
   }
   return attachments
+}
+
+export async function readPdf(pdf: Buffer, patterns: RegExp[] = [], opts = { max: 1 }): Promise<string[]> {
+  // default option: {max: 1}, to only read 1 page
+  const txt = (await Pdf(pdf, opts)).text;
+  let matches = [];
+  // search each line in the pdf text and only returns the ones matching one of the search patterns
+  if (txt?.length > 0) {
+    for (const line of txt.split('\n')) {
+      for (const pattern of patterns) {
+        if (pattern.test(line)) {
+          matches.push(line)
+        }
+      }
+    }
+  }
+  return matches;
 }

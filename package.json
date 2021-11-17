@@ -15,12 +15,13 @@
   "license": "MIT",
   "dependencies": {
     "@kenjiuno/msgreader": "^1.13.0",
-    "pdfreader": "^1.2.13",
+    "pdf-parse": "^1.1.1",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
+    "@types/pdf-parse": "^1.1.1",
     "@types/yargs": "^16.0.4",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7",
