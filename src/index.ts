@@ -1,48 +1,66 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
-import MsgReader from '@kenjiuno/msgreader';
-import Pdf from 'pdf-parse';
+import * as Yargs from 'yargs';
+import RegexParser from 'regex-parser';
 
+import { getAttachments, getFiles, readPdf } from './tools';
 
-export async function getFiles(dir: string, pattern?: RegExp): Promise<string[]> {
-  const list = await fs.readdir(dir)
-
-  return list
-    .filter((file) => pattern ? pattern.test(file) : true)
-    .map((file) => path.join(dir, file))
-}
-
-export async function getAttachments(file: string, pattern: RegExp = /.pdf$/i)
-  : Promise<{ fileName: string; content: Uint8Array }[]> {
-  const fileBuffer = await fs.readFile(file)
-  const msg = new MsgReader(fileBuffer)
-  const info = msg.getFileData()
-
-  const attachments: { fileName: string; content: Uint8Array }[] = []
-  if (info.attachments) {
-    for (const att of info.attachments) {
-      if (new RegExp(pattern, 'i').test(att.fileName || '')) {
-        attachments.push(msg.getAttachment(att))
+export async function main(...args: string[]) {
+  const yargs = Yargs
+    .usage(`Usage: iread <options>`)
+    .options({
+      dir: {
+        alias: 'd',
+        describe: 'directory to read',
+        string: true,
+        default: '.',
+      },
+      msgPattern: {
+        alias: 'm',
+        describe: 'pattern to filer files',
+        string: true,
+        default: '/.msg$/i',
+      },
+      pdfPattern: {
+        alias: 'p',
+        describe: 'pattern to filer the pdf attachment in the message',
+        string: true,
+        default: '/.pdf$/i',
+      },
+      contentPattern: {
+        alias: 'c',
+        describe: 'a list of patterns to filter pdf contents',
+        array: true,
+        string: true,
+      },
+      output: {
+        alias: 'o',
+        describe: 'output path',
+        string: true,
       }
+    })
+    .version()
+    .showHelpOnFail(true)
+    .recommendCommands()
+    .help();
+
+  const argv = yargs.parse(args);
+  const files = await getFiles(argv.dir, RegexParser(argv.msgPattern));
+  const data: string[] = [];
+  const patterns = (argv.contentPattern || []).map(p => RegexParser(p));
+  for (const file of files) {
+    const pdfs = await getAttachments(file, RegexParser(argv.pdfPattern));
+    for (const pdf of pdfs) {
+      data.push(pdf.fileName);
+      const contents = await readPdf(Buffer.from(pdf.content), patterns);
+      data.push(...contents);
     }
   }
-  return attachments
-}
 
-export async function readPdf(pdf: Buffer, patterns: RegExp[] = [], opts = { max: 1 }): Promise<string[]> {
-  // default option: {max: 1}, to only read 1 page
-  const txt = (await Pdf(pdf, opts)).text;
-  let matches = [];
-  // search each line in the pdf text and only returns the ones matching one of the search patterns
-  if (txt?.length > 0) {
-    for (const line of txt.split('\n')) {
-      for (const pattern of patterns) {
-        if (pattern.test(line)) {
-          matches.push(line)
-        }
-      }
-    }
+  if (argv.output) {
+    await fs.writeFile(argv.output, data.join('\n'));
+  } else {
+    console.log(data.join('\n'));
   }
-  return matches;
+
 }

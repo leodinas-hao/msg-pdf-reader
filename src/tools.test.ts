@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { getFiles, getAttachments, readPdf } from './index';
+import { getFiles, getAttachments, readPdf } from './tools';
 
 const dir = 'C:/Users/lhao/Downloads/a';
 
@@ -24,7 +24,7 @@ test('should get attachment info', async () => {
 })
 
 test('should read pdf', async () => {
-  const data = [];
+  const data: string[] = [];
   const patterns = [
     /^Claim No.\d+$/,
     /^Return Authority\w+$/,

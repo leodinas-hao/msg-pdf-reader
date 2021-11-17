@@ -1,10 +1,16 @@
 {
   "name": "msg-pdf-reader",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "description": "little tool to bulk read contents of pdf files inside outlook msg **personal use only**",
+  "main": "bin/iread",
   "scripts": {
-    "test": "jest"
+    "compile": "tsc",
+    "test": "jest",
+    "prestart": "npm install",
+    "start": "npm run compile"
+  },
+  "bin": {
+    "iread": "./bin/iread"
   },
   "jest": {
     "verbose": true,
@@ -16,6 +22,7 @@
   "dependencies": {
     "@kenjiuno/msgreader": "^1.13.0",
     "pdf-parse": "^1.1.1",
+    "regex-parser": "^2.2.11",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
