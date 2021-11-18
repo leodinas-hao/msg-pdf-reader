@@ -33,6 +33,14 @@ export async function main(...args: string[]) {
         array: true,
         string: true,
       },
+      quote: {
+        default: '"',
+        string: true,
+      },
+      delimiter: {
+        default: ',',
+        string: true,
+      },
       output: {
         alias: 'o',
         describe: 'output path',
@@ -51,9 +59,9 @@ export async function main(...args: string[]) {
   for (const file of files) {
     const pdfs = await getAttachments(file, RegexParser(argv.pdfPattern));
     for (const pdf of pdfs) {
-      data.push(pdf.fileName);
       const contents = await readPdf(Buffer.from(pdf.content), patterns);
-      data.push(...contents);
+      const row = wrapRow(pdf.fileName, contents, argv.delimiter, argv.quote);
+      data.push(row);
     }
   }
 
@@ -63,4 +71,9 @@ export async function main(...args: string[]) {
     console.log(data.join('\n'));
   }
 
+}
+
+function wrapRow(name: string, contents: string[], delimiter: string, quote: string): string {
+  const row = [name, ...contents];
+  return row.map((cell) => quote + cell + quote).join(delimiter);
 }

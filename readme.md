@@ -8,5 +8,5 @@
 
 ## cli
 ```sh
-iread -d "." -c "/^Claim No.\d+$/" -c "/^Return Authority\w+$/" -c "/^Bill Of Lading\w*/"
+iread -c "/^Claim No.\d+$/" -c "/^Return Authority\w+$/" -c "/^Bill Of Lading\w*/" -d "." -o "read.csv"
 ```
