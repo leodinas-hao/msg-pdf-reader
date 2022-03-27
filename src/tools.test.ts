@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 
 import { getFiles, getAttachments, readPdf } from './tools';
 
-const dir = 'C:/Users/lhao/Downloads/a';
+const dir = 'test-files';
 
 test('should work', () => {
   expect.anything();
@@ -26,9 +26,10 @@ test('should get attachment info', async () => {
 test('should read pdf', async () => {
   const data: string[] = [];
   const patterns = [
-    /^Claim No.\d+$/,
-    /^Return Authority\w+$/,
-    /^Bill Of Lading\w*/,
+    /(?<=^Claim No.)\d+$/,
+    /(?<=^Return Authority)\S+$/,
+    /(?<=^Bill Of Lading)\w*/,
+    /(?<=Issued by:\s*)\w+$/,
   ];
   const files = await getFiles(dir, /.msg$/i)
   for (const file of files) {
@@ -42,5 +43,5 @@ test('should read pdf', async () => {
     }
   }
 
-  await fs.writeFile('dpfs.txt', data.join('\n'));
+  await fs.writeFile(`${dir}/dpfs.txt`, data.join('\n'));
 })

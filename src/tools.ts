@@ -36,12 +36,17 @@ export async function readPdf(pdf: Buffer, patterns: RegExp[] = [], opts = { max
   let matches: string[] = [];
   // search each line in the pdf text and only returns the ones matching one of the search patterns
   if (txt?.length > 0) {
-    for (const line of txt.split('\n')) {
-      for (const pattern of patterns) {
-        if (pattern.test(line)) {
-          matches.push(line)
+    const lines = txt.split('\n');
+    for (const pattern of patterns) {
+      let match = ''
+      for (const line of lines) {
+        const found = line.match(pattern)
+        if (found) {
+          match = found.toString();
+          break;
         }
       }
+      matches.push(match)
     }
   }
   return matches;

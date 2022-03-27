@@ -1,6 +1,6 @@
 {
   "name": "msg-pdf-reader",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "little tool to bulk read contents of pdf files inside outlook msg **personal use only**",
   "main": "bin/iread",
   "scripts": {

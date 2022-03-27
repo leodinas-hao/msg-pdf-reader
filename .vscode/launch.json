@@ -12,8 +12,9 @@
       "args": [
         "${fileBasename}",
         "--verbose",
-        "-i",
-        "--no-cache"
+        "--runInBand",
+        "--no-cache",
+        "--testTimeout=600000"
       ],
       "console": "integratedTerminal"
     }
